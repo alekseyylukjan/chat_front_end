@@ -83,6 +83,10 @@ body{
   padding:12px 14px; border-radius:14px; line-height:1.45;
   border:1px solid var(--stroke);
   box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+  
+  white-space: pre-wrap;   /* <-- ключевая строка */
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 .message.user .bubble{
   background: linear-gradient(180deg, rgba(0,51,160,0.35), rgba(0,51,160,0.18));
@@ -146,4 +150,5 @@ body{
   display:block; white-space:pre-wrap; background:rgba(0,0,0,0.35);
   border:1px solid var(--stroke); padding:8px; border-radius:10px;
 }
+
 
