@@ -91,9 +91,19 @@ body{
 .message.user .bubble{
   background: linear-gradient(180deg, rgba(0,51,160,0.35), rgba(0,51,160,0.18));
 }
-.message.bot .bubble{
-  background: linear-gradient(180deg, rgba(0,181,226,0.25), rgba(0,181,226,0.10));
+
+.message.bot .bubble p { margin: 0.5em 0; }
+.message.bot .bubble ul,
+.message.bot .bubble ol { margin: 0.5em 0 0.5em 1.25em; }
+.message.bot .bubble code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  padding: 0.1em 0.3em; border-radius: 4px; background: rgba(255,255,255,0.08);
 }
+.message.bot .bubble pre {
+  padding: 0.75em; border-radius: 10px; background: rgba(0,0,0,0.35);
+  overflow: auto; border: 1px solid var(--stroke);
+}
+
 .meta{margin-top:6px; color:var(--muted); font-size:12px}
 
 .composer{margin-top:14px; display:flex; gap:12px; align-items:flex-end}
@@ -150,5 +160,6 @@ body{
   display:block; white-space:pre-wrap; background:rgba(0,0,0,0.35);
   border:1px solid var(--stroke); padding:8px; border-radius:10px;
 }
+
 
 
