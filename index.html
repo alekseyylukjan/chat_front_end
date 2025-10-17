@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>HR Metrics Chat</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  #chat { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
+  .message { margin-bottom: 10px; }
+  .user { color: blue; }
+  .bot { color: green; }
+  #history { display: none; }
+</style>
+</head>
+<body>
+
+<h2>HR Metrics Chat</h2>
+<div id="chat"></div>
+
+<textarea id="question" rows="3" style="width: 100%;" placeholder="Введите ваш вопрос..."></textarea>
+<br/>
+<button id="sendBtn">Отправить</button>
+<button id="downloadBtn">Скачать историю</button>
+
+<script>
+  // Задайте переменную окружения ACCESS_CODE через сервер или вручную
+  const ACCESS_CODE = "777"; // Можно заменить на переменную, полученную из окружения сервера
+  const apiUrl = "https://o7b3-d3ok-z834.gw-1a.dockhost.net/ask"; // ваш API
+
+  const chatDiv = document.getElementById("chat");
+  const questionInput = document.getElementById("question");
+  const sendBtn = document.getElementById("sendBtn");
+  const downloadBtn = document.getElementById("downloadBtn");
+
+  // Ведение истории сообщений
+  let conversationHistory = [];
+
+  function addMessage(text, sender='user') {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "message " + sender;
+    msgDiv.innerText = text;
+    chatDiv.appendChild(msgDiv);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+  }
+
+  async function sendQuestion() {
+    const questionText = questionInput.value.trim();
+    if (!questionText) return;
+
+    addMessage("Вы: " + questionText, 'user');
+
+    // Формируем историю из последних 4 сообщений + текущий вопрос
+    const recentHistory = conversationHistory.slice(-4);
+    // Вставляем текущий вопрос
+    recentHistory.push({role: "user", content: questionText});
+
+    // Формируем payload для API
+    const payload = {
+      question: questionText,
+      history: recentHistory
+    };
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Access-Code": ACCESS_CODE
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+
+      // Обработка ответа
+      const answerText = data.answer || "Нет ответа.";
+      addMessage("Бот: " + answerText, 'bot');
+
+      // Запоминаем весь обмен для истории
+      conversationHistory.push({role: "user", content: questionText});
+      conversationHistory.push({role: "bot", content: answerText});
+    } catch(e) {
+      addMessage("Ошибка при отправке запроса: " + e.message, 'bot');
+    }
+
+    questionInput.value = "";
+  }
+
+  sendBtn.onclick = sendQuestion;
+
+  // Функция для скачивания истории
+  function downloadHistory() {
+    let text = "";
+    for (const msg of conversationHistory) {
+      if (msg.role === "user") {
+        text += `Пользователь: ${msg.content}\n`;
+      } else {
+        text += `Бот: ${msg.content}\n`;
+      }
+    }
+    const blob = new Blob([text], {type: "text/plain"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "история_общения.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  downloadBtn.onclick = downloadHistory;
+
+  // Можно также отправить вопрос по Enter
+  questionInput.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendQuestion();
+    }
+  });
+</script>
+
+</body>
+</html>
