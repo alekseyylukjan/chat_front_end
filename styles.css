@@ -79,22 +79,43 @@ body{
   border:1px dashed rgba(255,255,255,0.08);
 }
 .message{margin:12px 0; max-width: 90%}
+
+/* базовый пузырь */
 .message .bubble{
   padding:12px 14px; border-radius:14px; line-height:1.45;
   border:1px solid var(--stroke);
   box-shadow: 0 8px 28px rgba(0,0,0,0.25);
-  
-  white-space: pre-wrap;   /* <-- ключевая строка */
+}
+
+/* пользователь: храним \n и пробелы */
+.message.user .bubble{
+  background: linear-gradient(180deg, rgba(0,51,160,0.35), rgba(0,51,160,0.18));
+  white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: anywhere;
 }
-.message.user .bubble{
-  background: linear-gradient(180deg, rgba(0,51,160,0.35), rgba(0,51,160,0.18));
+
+/* бот: markdown → HTML, поэтому нормальный перенос строк и сжатые отступы */
+.message.bot .bubble{
+  background: linear-gradient(180deg, rgba(0,181,226,0.25), rgba(0,181,226,0.10));
+  white-space: normal;   /* важно: отключаем pre-wrap для HTML */
+  line-height: 1.4;
 }
 
-.message.bot .bubble p { margin: 0.5em 0; }
+/* markdown-отступы/типографика внутри ответа бота */
+.message.bot .bubble p { margin: 0.3em 0; }
 .message.bot .bubble ul,
-.message.bot .bubble ol { margin: 0.5em 0 0.5em 1.25em; }
+.message.bot .bubble ol { margin: 0.25em 0 0.25em 1.25em; }
+.message.bot .bubble li { margin: 0.15em 0; }
+.message.bot .bubble li > p { margin: 0.2em 0; }
+.message.bot .bubble pre { margin: 0.4em 0; line-height: 1.35; }
+.message.bot .bubble h1,
+.message.bot .bubble h2,
+.message.bot .bubble h3 { margin: 0.6em 0 0.3em; line-height: 1.2; }
+.message.bot .bubble h4,
+.message.bot .bubble h5,
+.message.bot .bubble h6 { margin: 0.5em 0 0.25em; line-height: 1.25; }
+
 .message.bot .bubble code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   padding: 0.1em 0.3em; border-radius: 4px; background: rgba(255,255,255,0.08);
@@ -160,6 +181,3 @@ body{
   display:block; white-space:pre-wrap; background:rgba(0,0,0,0.35);
   border:1px solid var(--stroke); padding:8px; border-radius:10px;
 }
-
-
-
