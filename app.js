@@ -1,0 +1,233 @@
+// ====== Конфиг окружения (подставляется в env.js) ======
+const API_URL = (window.__ENV && window.__ENV.API_URL) || "http://localhost:8000/ask";
+const ACCESS_CODE = (window.__ENV && window.__ENV.ACCESS_CODE) || "";
+
+// ====== DOM ======
+const chatDiv = document.getElementById("chat");
+const questionInput = document.getElementById("question");
+const sendBtn = document.getElementById("sendBtn");
+const spinner = document.getElementById("spinner");
+const downloadBtn = document.getElementById("downloadBtn");
+const clearBtn = document.getElementById("clearBtn");
+const historyList = document.getElementById("historyList");
+
+// ====== История (сохранение в localStorage) ======
+let conversationHistory = loadHistory();
+
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem("hr_chat_history");
+    return raw ? JSON.parse(raw) : [];
+  }catch{ return []; }
+}
+function saveHistory(){
+  localStorage.setItem("hr_chat_history", JSON.stringify(conversationHistory));
+  renderHistorySidebar();
+}
+function clearHistory(){
+  conversationHistory = [];
+  saveHistory();
+  chatDiv.innerHTML = "";
+}
+
+function addMessageToChat(text, sender='user', meta={}){
+  const msg = document.createElement("div");
+  msg.className = `message ${sender}`;
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.textContent = text;
+  msg.appendChild(bubble);
+
+  if (meta && (meta.sql_text_raw || meta.sql_text_expanded)){
+    const m = document.createElement("div");
+    m.className = "meta";
+    m.textContent = "См. SQL ниже в истории";
+    msg.appendChild(m);
+  }
+
+  chatDiv.appendChild(msg);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+function typewriterMessage(text, sender='bot', speedMsPerWord=45, meta={}){
+  const msg = document.createElement("div");
+  msg.className = `message ${sender}`;
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  msg.appendChild(bubble);
+  chatDiv.appendChild(msg);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+
+  const words = text.split(/(\s+)/); // сохраняем пробелы
+  let i = 0;
+  function step(){
+    if (i < words.length){
+      bubble.textContent += words[i++];
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+      setTimeout(step, speedMsPerWord);
+    }
+  }
+  step();
+
+  if (meta && (meta.sql_text_raw || meta.sql_text_expanded)){
+    const m = document.createElement("div");
+    m.className = "meta";
+    m.textContent = "См. SQL ниже в истории";
+    msg.appendChild(m);
+  }
+}
+
+function renderHistorySidebar(){
+  historyList.innerHTML = "";
+  conversationHistory.forEach((item, idx) => {
+    const card = document.createElement("div");
+    card.className = "hist-item";
+
+    const q = document.createElement("div");
+    q.className = "hist-q";
+    q.textContent = item.role === "user" ? `Вы: ${item.content}` : `Бот: ${truncate(item.content,120)}`;
+    card.appendChild(q);
+
+    // SQL секция, если есть
+    if (item.sql_text_raw || item.sql_text_expanded){
+      const sqls = document.createElement("div");
+      sqls.className = "sqls";
+
+      const detailsRaw = document.createElement("details");
+      const sumRaw = document.createElement("summary");
+      sumRaw.textContent = "SQL (raw)";
+      const preRaw = document.createElement("code");
+      preRaw.textContent = item.sql_text_raw || "—";
+      detailsRaw.appendChild(sumRaw); detailsRaw.appendChild(preRaw);
+
+      const detailsExp = document.createElement("details");
+      const sumExp = document.createElement("summary");
+      sumExp.textContent = "SQL (expanded)";
+      const preExp = document.createElement("code");
+      preExp.textContent = item.sql_text_expanded || "—";
+      detailsExp.appendChild(sumExp); detailsExp.appendChild(preExp);
+
+      sqls.appendChild(detailsRaw);
+      sqls.appendChild(detailsExp);
+      card.appendChild(sqls);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = `${item.timestamp || ""} ${item.rows_count!=null ? ` • rows: ${item.rows_count}` : ""}`;
+    card.appendChild(meta);
+
+    historyList.appendChild(card);
+  });
+}
+renderHistorySidebar();
+
+function truncate(s, n){ return s && s.length>n ? s.slice(0,n)+"…" : (s||""); }
+function nowStr(){
+  const d = new Date();
+  return d.toLocaleString();
+}
+
+// ====== Отправка ======
+async function sendQuestion(){
+  const questionText = questionInput.value.trim();
+  if(!questionText) return;
+
+  addMessageToChat(questionText, 'user');
+
+  // формируем последние 4 сообщения (как в исходнике)
+  const recentHistory = conversationHistory.slice(-4).map(({role, content}) => ({role, content}));
+  recentHistory.push({role:"user", content:questionText});
+
+  const payload = { question: questionText, history: recentHistory };
+
+  // UI — загрузка
+  sendBtn.classList.add("loading");
+  sendBtn.setAttribute("disabled","true");
+
+  try{
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Access-Code": ACCESS_CODE
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    const answerText = data.answer || "Нет ответа.";
+    // Плавный вывод
+    typewriterMessage(answerText, 'bot', 35, { sql_text_raw: data.sql_text_raw, sql_text_expanded: data.sql_text_expanded });
+
+    // Запоминаем обмен. Храним SQL, если они были.
+    conversationHistory.push({
+      role: "user",
+      content: questionText,
+      timestamp: nowStr()
+    });
+
+    const botRecord = {
+      role: "bot",
+      content: answerText,
+      timestamp: nowStr(),
+      rows_count: data.rows_count ?? null,
+      mode: data.mode || null
+    };
+
+    // если бэк вернул SQL — кладём в историю
+    if (data.sql_text_raw || data.sql_text_expanded){
+      botRecord.sql_text_raw = data.sql_text_raw || null;
+      botRecord.sql_text_expanded = data.sql_text_expanded || null;
+    }
+
+    conversationHistory.push(botRecord);
+    saveHistory();
+  }catch(e){
+    typewriterMessage("Ошибка при отправке запроса: " + (e.message||e), 'bot', 20);
+  }finally{
+    sendBtn.classList.remove("loading");
+    sendBtn.removeAttribute("disabled");
+  }
+
+  questionInput.value = "";
+}
+
+sendBtn.onclick = sendQuestion;
+questionInput.addEventListener("keydown", e=>{
+  if (e.key === "Enter" && !e.shiftKey){
+    e.preventDefault();
+    sendQuestion();
+  }
+});
+
+downloadBtn.onclick = () => {
+  let text = "";
+  for (const msg of conversationHistory){
+    if (msg.role === "user"){
+      text += `Пользователь [${msg.timestamp||""}]: ${msg.content}\n`;
+    } else {
+      text += `Бот [${msg.timestamp||""}]: ${msg.content}\n`;
+      if (msg.sql_text_raw) {
+        text += `--- SQL (raw) ---\n${msg.sql_text_raw}\n`;
+      }
+      if (msg.sql_text_expanded) {
+        text += `--- SQL (expanded) ---\n${msg.sql_text_expanded}\n`;
+      }
+      if (msg.rows_count!=null){
+        text += `rows_count: ${msg.rows_count}\n`;
+      }
+    }
+    text += `\n`;
+  }
+  const blob = new Blob([text], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "история_общения.txt"; a.click();
+  URL.revokeObjectURL(url);
+};
+
+clearBtn.onclick = () => {
+  if (confirm("Очистить историю переписки?")) clearHistory();
+};
