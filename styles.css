@@ -45,6 +45,11 @@ body{
   background: conic-gradient(from 200deg at 50% 50%, var(--accent), var(--blue));
   box-shadow: 0 10px 30px rgba(0,51,160,0.35), inset 0 0 40px rgba(255,255,255,0.08);
 }
+
+.logo{ width:auto; height:auto; padding:8px 12px; border-radius:14px; font-size:18px }
+.logo-sub{ margin-left:8px; color:#EAF2FF; opacity:.9; font-weight:600 }
+.brand{ display:flex; align-items:center; gap:8px } /* у вас уже есть, но ок */
+
 .titles h1{margin:0; font-size:18px; font-weight:700}
 .titles p{margin:2px 0 0; color:var(--muted); font-size:13px}
 .actions{display:flex; gap:10px}
@@ -141,3 +146,4 @@ body{
   display:block; white-space:pre-wrap; background:rgba(0,0,0,0.35);
   border:1px solid var(--stroke); padding:8px; border-radius:10px;
 }
+
