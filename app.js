@@ -49,25 +49,17 @@ function addMessageToChat(text, sender='user', meta={}){
   chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 
-function typewriterMessage(text, sender='bot', speedMsPerWord=45, meta={}){
+function appendBotMarkdown(markdownText, meta={}) {
   const msg = document.createElement("div");
-  msg.className = `message ${sender}`;
+  msg.className = "message bot";
   const bubble = document.createElement("div");
   bubble.className = "bubble";
-  msg.appendChild(bubble);
-  chatDiv.appendChild(msg);
-  chatDiv.scrollTop = chatDiv.scrollHeight;
 
-  const words = text.split(/(\s+)/); // сохраняем пробелы
-  let i = 0;
-  function step(){
-    if (i < words.length){
-      bubble.textContent += words[i++];
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-      setTimeout(step, speedMsPerWord);
-    }
-  }
-  step();
+  // markdown -> HTML, потом санитайзим
+  const html = DOMPurify.sanitize(marked.parse(markdownText, { breaks: true }));
+  bubble.innerHTML = html;
+
+  msg.appendChild(bubble);
 
   if (meta && (meta.sql_text_raw || meta.sql_text_expanded)){
     const m = document.createElement("div");
@@ -75,6 +67,9 @@ function typewriterMessage(text, sender='bot', speedMsPerWord=45, meta={}){
     m.textContent = "См. SQL ниже в истории";
     msg.appendChild(m);
   }
+
+  chatDiv.appendChild(msg);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 
 function renderHistorySidebar(){
@@ -159,7 +154,7 @@ async function sendQuestion(){
 
     const answerText = data.answer || "Нет ответа.";
     // Плавный вывод
-    typewriterMessage(answerText, 'bot', 35, { sql_text_raw: data.sql_text_raw, sql_text_expanded: data.sql_text_expanded });
+    appendBotMarkdown(answerText, { sql_text_raw: data.sql_text_raw, sql_text_expanded: data.sql_text_expanded });
 
     // Запоминаем обмен. Храним SQL, если они были.
     conversationHistory.push({
@@ -231,3 +226,4 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
