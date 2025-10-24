@@ -107,6 +107,35 @@ function renderHistorySidebar(){
       card.appendChild(sqls);
     }
 
+    // Таблица (если есть)
+    if (item.rows_preview) {  
+      const preview = document.createElement("div");  
+      preview.className = "preview";  
+      const detailsPreview = document.createElement("details");  
+      const summaryPreview = document.createElement("summary");  
+      summaryPreview.textContent = "Предварительный просмотр строк";  
+      const table = document.createElement("table");  
+      const headerRow = document.createElement("tr");  
+      // Создаем заголовки таблицы  
+      Object.keys(item.rows_preview[0]).forEach(key => {    
+        const th = document.createElement("th");    
+        th.textContent = key;    
+        headerRow.appendChild(th);  
+      }); 
+      table.appendChild(headerRow); 
+      
+      // Создаем строки таблицы  
+      item.rows_preview.forEach(row => {    
+        const rowEl = document.createElement("tr");    
+        Object.values(row).forEach(value => {      
+          const td = document.createElement("td");      
+          td.textContent = value;      
+          rowEl.appendChild(td);    
+        });    
+        table.appendChild(rowEl);  });  detailsPreview.appendChild(summaryPreview);  detailsPreview.appendChild(table);  card.appendChild(detailsPreview);
+    }
+    
+
     const meta = document.createElement("div");
     meta.className = "meta";
     meta.textContent = `${item.timestamp || ""} ${item.rows_count!=null ? ` • rows: ${item.rows_count}` : ""}`;
@@ -172,9 +201,10 @@ async function sendQuestion(){
     };
 
     // если бэк вернул SQL — кладём в историю
-    if (data.sql_text_raw || data.sql_text_expanded){
-      botRecord.sql_text_raw = data.sql_text_raw || null;
-      botRecord.sql_text_expanded = data.sql_text_expanded || null;
+    if (data.sql_text_raw || data.sql_text_expanded || data.rows_preview) {  
+      botRecord.sql_text_raw = data.sql_text_raw || null;  
+      botRecord.sql_text_expanded = data.sql_text_expanded || null;  
+      botRecord.rows_preview = data.rows_preview || null;
     }
 
     conversationHistory.push(botRecord);
@@ -226,4 +256,5 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
