@@ -186,7 +186,7 @@ function renderHistorySidebar(){
     // Таблица (если есть)
     if (item.rows_preview) {
       const preview = document.createElement("div");
-      preview.className = "preview";
+      preview.className = "preview sqls";
 
       const detailsPreview = document.createElement("details");
       detailsPreview.open = false; // закрыто
@@ -373,6 +373,7 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
 
