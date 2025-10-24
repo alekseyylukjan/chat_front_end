@@ -246,6 +246,7 @@ async function sendQuestion(){
       botRecord.sql_text_raw = data.sql_text_raw || null;  
       botRecord.sql_text_expanded = data.sql_text_expanded || null;  
       botRecord.rows_preview = data.rows_preview || null;
+      botRecord.columns = data.columns || null;
     }
 
     conversationHistory.push(botRecord);
@@ -297,6 +298,7 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
 
