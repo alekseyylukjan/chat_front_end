@@ -189,7 +189,7 @@ function renderHistorySidebar(){
       preview.className = "preview";
 
       const detailsPreview = document.createElement("details");
-      detailsPreview.open = true; // сразу открыто
+      detailsPreview.open = false; // закрыто
 
       const summaryPreview = document.createElement("summary");
       summaryPreview.textContent = "Предварительный просмотр строк";
@@ -293,14 +293,6 @@ async function sendQuestion(){
     });
 
     const data = await response.json();
-
-    // ↓↓↓ ДОБАВЬТЕ ОТЛАДОЧНЫЕ ЛОГИ ЗДЕСЬ ↓↓↓
-    console.log('[DBG] keys:', Object.keys(data));
-    console.log('[DBG] typeof rows_preview:', typeof data.rows_preview, 'isArray', Array.isArray(data.rows_preview));
-    console.log('[DBG] sample row:', Array.isArray(data.rows_preview) ? data.rows_preview[0] : data.rows_preview);
-    console.log('[DBG] columns:', data.columns);
-    // ↑↑↑ ДОБАВЬТЕ ОТЛАДОЧНЫЕ ЛОГИ ЗДЕСЬ ↑↑↑
-
     const answerText = data.answer || "Нет ответа.";
     // Плавный вывод
     appendBotMarkdown(answerText, { sql_text_raw: data.sql_text_raw, sql_text_expanded: data.sql_text_expanded });
@@ -381,14 +373,5 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
-
-
-
-
-
-
-
-
-
 
 
