@@ -183,7 +183,7 @@ body{
 }
 
 /* Общие стили для таблиц предварительного просмотра */
-.preview table {
+.preview table, .message.bot .bubble table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -193,7 +193,7 @@ body{
   border: 1px solid var(--stroke);
 }
 
-.preview th, .preview td {
+.preview th, .preview td, .message.bot .bubble th, .message.bot .bubble td {
   padding: 8px 12px;
   border-right: 1px solid var(--stroke);
   border-bottom: 1px solid var(--stroke);
@@ -201,17 +201,18 @@ body{
   vertical-align: middle;
 }
 
-.preview th {
+.preview th, .message.bot .bubble th {
   background: linear-gradient(180deg, rgba(0,51,160,0.35), rgba(0,51,160,0.18));
   color: #e7ecff;
   font-weight: bold;
 }
 
-.preview tbody tr:nth-child(even) {
+.preview tbody tr:nth-child(even), .message.bot .bubble tbody tr:nth-child(even) {
   background: rgba(255,255,255,0.05);
 }
 
-.preview tbody tr:hover {
+.preview tbody tr:hover, .message.bot .bubble tbody tr:hover {
   background: rgba(0,181,226,0.15);
 }
+
 
