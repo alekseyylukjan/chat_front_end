@@ -49,6 +49,68 @@ function addMessageToChat(text, sender='user', meta={}){
   chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 
+function addPreviewTableToChat(rowsInput, columnsInput) {
+  if (!rowsInput || (Array.isArray(rowsInput) && rowsInput.length === 0)) return;
+
+  // нормализуем формат
+  let rows = rowsInput;
+  if (typeof rows === "string") {
+    try { rows = JSON.parse(rows); } catch { rows = []; }
+  }
+  if (!Array.isArray(rows) || !rows.length || typeof rows[0] !== "object" || Array.isArray(rows[0])) return;
+
+  const columns = (columnsInput && columnsInput.length)
+    ? columnsInput.map(String)
+    : Object.keys(rows[0]);
+
+  const msg = document.createElement("div");
+  msg.className = "message bot";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+
+  const details = document.createElement("details");
+  details.open = true;
+  const summary = document.createElement("summary");
+  summary.textContent = "Предварительный просмотр строк";
+
+  const table = document.createElement("table");
+  const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
+
+  // thead
+  const trHead = document.createElement("tr");
+  for (const c of columns) {
+    const th = document.createElement("th");
+    th.textContent = c;
+    trHead.appendChild(th);
+  }
+  thead.appendChild(trHead);
+
+  // tbody
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    for (const c of columns) {
+      const td = document.createElement("td");
+      const v = r?.[c];
+      td.textContent = (v === null || v === undefined) ? "" : String(v);
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+
+  table.appendChild(thead);
+  table.appendChild(tbody);
+
+  details.appendChild(summary);
+  details.appendChild(table);
+  bubble.appendChild(details);
+  msg.appendChild(bubble);
+
+  chatDiv.appendChild(msg);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
 function appendBotMarkdown(markdownText, meta={}) {
   const msg = document.createElement("div");
   msg.className = "message bot";
@@ -298,6 +360,7 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
 
