@@ -80,7 +80,7 @@ function addPreviewTableToChat(rowsInput, columnsInput) {
   bubble.className = "bubble";
 
   const details = document.createElement("details");
-  details.open = true;
+  details.open = false;
   const summary = document.createElement("summary");
   summary.textContent = "Предварительный просмотр строк";
 
@@ -373,5 +373,6 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
