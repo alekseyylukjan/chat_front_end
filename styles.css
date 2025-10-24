@@ -218,6 +218,15 @@ body{
   border: 1px solid var(--stroke);
 }
 
+/* Заголовок "Предварительный просмотр строк" в истории — мелкий, как у SQL */
+.preview.sqls summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin: 6px 0;
+  font-size: 12px;       /* ← уменьшили кегль */
+  color: var(--muted);   /* ← тот же цвет, что у SQL (raw) */
+}
+
 .preview th, .preview td, .message.bot .bubble th, .message.bot .bubble td {
   padding: 8px 12px;
   border-right: 1px solid var(--stroke);
@@ -239,6 +248,7 @@ body{
 .preview tbody tr:hover, .message.bot .bubble tbody tr:hover {
   background: rgba(0,181,226,0.15);
 }
+
 
 
 
