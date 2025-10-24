@@ -287,6 +287,10 @@ async function sendQuestion(){
     const answerText = data.answer || "Нет ответа.";
     // Плавный вывод
     appendBotMarkdown(answerText, { sql_text_raw: data.sql_text_raw, sql_text_expanded: data.sql_text_expanded });
+    // Таблица прямо в чат
+    if (data.rows_preview) {
+      addPreviewTableToChat(data.rows_preview, data.columns);
+    }
 
     // Запоминаем обмен. Храним SQL, если они были.
     conversationHistory.push({
@@ -360,6 +364,7 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
 
