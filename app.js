@@ -80,7 +80,9 @@ function renderHistorySidebar(){
 
     const q = document.createElement("div");
     q.className = "hist-q";
-    q.textContent = item.role === "user" ? `Вы: ${item.content}` : `Бот: ${truncate(item.content,120)}`;
+    q.textContent = item.role === "user"
+      ? `Вы: ${item.content}`
+      : `Бот: ${truncate(item.content, 120)}`;
     card.appendChild(q);
 
     // SQL секция, если есть
@@ -93,14 +95,16 @@ function renderHistorySidebar(){
       sumRaw.textContent = "SQL (raw)";
       const preRaw = document.createElement("code");
       preRaw.textContent = item.sql_text_raw || "—";
-      detailsRaw.appendChild(sumRaw); detailsRaw.appendChild(preRaw);
+      detailsRaw.appendChild(sumRaw);
+      detailsRaw.appendChild(preRaw);
 
       const detailsExp = document.createElement("details");
       const sumExp = document.createElement("summary");
       sumExp.textContent = "SQL (expanded)";
       const preExp = document.createElement("code");
       preExp.textContent = item.sql_text_expanded || "—";
-      detailsExp.appendChild(sumExp); detailsExp.appendChild(preExp);
+      detailsExp.appendChild(sumExp);
+      detailsExp.appendChild(preExp);
 
       sqls.appendChild(detailsRaw);
       sqls.appendChild(detailsExp);
@@ -108,46 +112,74 @@ function renderHistorySidebar(){
     }
 
     // Таблица (если есть)
-    if (item.rows_preview) { 
-      console.log('Rendering table', item.rows_preview);
-      const preview = document.createElement("div");  
-      preview.className = "preview";  
-      const detailsPreview = document.createElement("details");  
-      const summaryPreview = document.createElement("summary");  
-      summaryPreview.textContent = "Предварительный просмотр строк";  
-      const table = document.createElement("table");  
-      
-      // Создаем заголовки таблицы  
-      if (item.rows_preview.length > 0) {
-        const headerRow = document.createElement("tr");
-        Object.keys(item.rows_preview[0]).forEach(key => {    
-          const th = document.createElement("th");    
-          th.textContent = key;    
-          headerRow.appendChild(th);
-        });
-        table.appendChild(headerRow);
+    if (item.rows_preview) {
+      const preview = document.createElement("div");
+      preview.className = "preview";
+
+      const detailsPreview = document.createElement("details");
+      detailsPreview.open = true; // сразу открыто
+
+      const summaryPreview = document.createElement("summary");
+      summaryPreview.textContent = "Предварительный просмотр строк";
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const tbody = document.createElement("tbody");
+
+      // Нормализация формата (вдруг строка)
+      let rows = item.rows_preview;
+      if (typeof rows === "string") {
+        try { rows = JSON.parse(rows); } catch { rows = []; }
       }
 
-      // Создаем строки таблицы  
-      item.rows_preview.forEach(row => {    
-        const rowEl = document.createElement("tr");    
-        Object.values(row).forEach(value => {      
-          const td = document.createElement("td");      
-          td.textContent = value;      
-          rowEl.appendChild(td);    
-        });    
-        table.appendChild(rowEl);  
-      }); 
-      
-      detailsPreview.appendChild(summaryPreview);
-      detailsPreview.appendChild(table);
-      preview.appendChild(detailsPreview);
-      card.appendChild(preview);
+      // Ожидаем массив объектов
+      if (Array.isArray(rows) && rows.length && typeof rows[0] === "object" && !Array.isArray(rows[0])) {
+        const columns = (item.columns && item.columns.length)
+          ? item.columns.map(String)
+          : Object.keys(rows[0]);
+
+        // thead
+        const trHead = document.createElement("tr");
+        for (const c of columns) {
+          const th = document.createElement("th");
+          th.textContent = c;
+          trHead.appendChild(th);
+        }
+        thead.appendChild(trHead);
+
+        // tbody
+        for (const r of rows) {
+          const tr = document.createElement("tr");
+          for (const c of columns) {
+            const td = document.createElement("td");
+            const v = r?.[c];
+            td.textContent = (v === null || v === undefined) ? "" : String(v);
+            tr.appendChild(td);
+          }
+          tbody.appendChild(tr);
+        }
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        detailsPreview.appendChild(summaryPreview);
+        detailsPreview.appendChild(table);
+        preview.appendChild(detailsPreview);
+        card.appendChild(preview);
+      } else {
+        // Пусто или неожиданный формат — понятная заметка
+        const noteWrap = document.createElement("div");
+        noteWrap.className = "meta";
+        noteWrap.textContent = "Нет данных для превью (rows_preview пустой или в неожиданном формате).";
+        detailsPreview.appendChild(summaryPreview);
+        detailsPreview.appendChild(noteWrap);
+        preview.appendChild(detailsPreview);
+        card.appendChild(preview);
+      }
     }
 
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.textContent = `${item.timestamp || ""} ${item.rows_count != null ? ` • rows: ${item.rows_count}` : ""}`;
+    meta.textContent = `${item.timestamp || ""}${item.rows_count != null ? ` • rows: ${item.rows_count}` : ""}`;
     card.appendChild(meta);
 
     historyList.appendChild(card);
@@ -265,6 +297,7 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
 
