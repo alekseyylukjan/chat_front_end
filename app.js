@@ -318,7 +318,7 @@ async function sendQuestion(){
     conversationHistory.push(botRecord);
     saveHistory();
   }catch(e){
-    typewriterMessage("Ошибка при отправке запроса: " + (e.message||e), 'bot', 20);
+    addMessageToChat("Ошибка при отправке запроса: " + (e.message||e), 'bot');
   }finally{
     sendBtn.classList.remove("loading");
     sendBtn.removeAttribute("disabled");
@@ -364,6 +364,7 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
 
