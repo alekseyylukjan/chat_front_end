@@ -115,15 +115,18 @@ function renderHistorySidebar(){
       const summaryPreview = document.createElement("summary");  
       summaryPreview.textContent = "Предварительный просмотр строк";  
       const table = document.createElement("table");  
-      const headerRow = document.createElement("tr");  
-      // Создаем заголовки таблицы  
-      Object.keys(item.rows_preview[0]).forEach(key => {    
-        const th = document.createElement("th");    
-        th.textContent = key;    
-        headerRow.appendChild(th);  
-      }); 
-      table.appendChild(headerRow); 
       
+      // Создаем заголовки таблицы  
+      if (item.rows_preview.length > 0) {
+        const headerRow = document.createElement("tr");
+        Object.keys(item.rows_preview[0]).forEach(key => {    
+          const th = document.createElement("th");    
+          th.textContent = key;    
+          headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+      }
+
       // Создаем строки таблицы  
       item.rows_preview.forEach(row => {    
         const rowEl = document.createElement("tr");    
@@ -132,13 +135,18 @@ function renderHistorySidebar(){
           td.textContent = value;      
           rowEl.appendChild(td);    
         });    
-        table.appendChild(rowEl);  });  detailsPreview.appendChild(summaryPreview);  detailsPreview.appendChild(table);  card.appendChild(detailsPreview);
+        table.appendChild(rowEl);  
+      }); 
+      
+      detailsPreview.appendChild(summaryPreview);
+      detailsPreview.appendChild(table);
+      preview.appendChild(detailsPreview);
+      card.appendChild(preview);
     }
-    
 
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.textContent = `${item.timestamp || ""} ${item.rows_count!=null ? ` • rows: ${item.rows_count}` : ""}`;
+    meta.textContent = `${item.timestamp || ""} ${item.rows_count != null ? ` • rows: ${item.rows_count}` : ""}`;
     card.appendChild(meta);
 
     historyList.appendChild(card);
@@ -256,5 +264,6 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
