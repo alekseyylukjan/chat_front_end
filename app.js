@@ -51,7 +51,7 @@ function addMessageToChat(text, sender='user', meta={}){
   if (meta && (meta.sql_text_raw || meta.sql_text_expanded)){
     const m = document.createElement("div");
     m.className = "meta";
-    m.textContent = "См. SQL ниже в истории";
+    m.textContent = "См. SQL в истории";
     msg.appendChild(m);
   }
 
@@ -82,7 +82,7 @@ function addPreviewTableToChat(rowsInput, columnsInput) {
   const details = document.createElement("details");
   details.open = false;
   const summary = document.createElement("summary");
-  summary.textContent = "Предварительный просмотр строк";
+  summary.textContent = "Таблица, на базе которой сформирован ответ";
 
   const table = document.createElement("table");
   const thead = document.createElement("thead");
@@ -136,7 +136,7 @@ function appendBotMarkdown(markdownText, meta={}) {
   if (meta && (meta.sql_text_raw || meta.sql_text_expanded)){
     const m = document.createElement("div");
     m.className = "meta";
-    m.textContent = "См. SQL ниже в истории";
+    m.textContent = "См. SQL в истории";
     msg.appendChild(m);
   }
 
@@ -192,7 +192,7 @@ function renderHistorySidebar(){
       detailsPreview.open = false; // закрыто
 
       const summaryPreview = document.createElement("summary");
-      summaryPreview.textContent = "Предварительный просмотр строк";
+      summaryPreview.textContent = "Таблица, на базе которой сформирован ответ";
 
       const table = document.createElement("table");
       const thead = document.createElement("thead");
@@ -373,6 +373,7 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
 
