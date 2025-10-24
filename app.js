@@ -21,8 +21,18 @@ function loadHistory(){
   }catch{ return []; }
 }
 function saveHistory(){
-  localStorage.setItem("hr_chat_history", JSON.stringify(conversationHistory));
-  renderHistorySidebar();
+  try {
+    localStorage.setItem("hr_chat_history", JSON.stringify(conversationHistory));
+    renderHistorySidebar();
+  } catch (e) {
+    console.warn('Не удалось сохранить историю (возможно, переполнен localStorage):', e);
+    // мягкая деградация: можно обрезать историю
+    conversationHistory = conversationHistory.slice(-20);
+    try {
+      localStorage.setItem("hr_chat_history", JSON.stringify(conversationHistory));
+      renderHistorySidebar();
+    } catch(_) {}
+  }
 }
 function clearHistory(){
   conversationHistory = [];
@@ -364,6 +374,7 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
 
