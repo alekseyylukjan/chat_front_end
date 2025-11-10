@@ -12,7 +12,7 @@ server {
 
     # Прокси до вашего бэкенда (куда фронтенд будет отправлять POST /ask)
     location /ask {
-        proxy_pass ${BACKEND_URL};
+        proxy_pass ${API_URL};
 
         # Добавляем секретный заголовок на серверной стороне (браузер его не видит)
         proxy_set_header X-Access-Code "${ACCESS_CODE}";
