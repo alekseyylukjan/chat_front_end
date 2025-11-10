@@ -1,6 +1,5 @@
 // ====== Конфиг окружения (подставляется в env.js) ======
-const API_URL = (window.__ENV && window.__ENV.API_URL) || "http://localhost:8000/ask";
-const ACCESS_CODE = (window.__ENV && window.__ENV.ACCESS_CODE) || "";
+const API_URL = "/ask";
 
 // ====== DOM ======
 const chatDiv = document.getElementById("chat");
@@ -285,10 +284,7 @@ async function sendQuestion(){
   try{
     const response = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Access-Code": ACCESS_CODE
-      },
+      headers: {"Content-Type": "application/json"},
       body: JSON.stringify(payload)
     });
 
@@ -373,6 +369,7 @@ downloadBtn.onclick = () => {
 clearBtn.onclick = () => {
   if (confirm("Очистить историю переписки?")) clearHistory();
 };
+
 
 
 
